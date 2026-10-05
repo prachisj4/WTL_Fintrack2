@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#0d1830"/>
+  <title>FinTrack · Money Made Clearer</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <!-- AUTH SECTION -->
+  <div id="auth" class="auth-page">
+    <div class="auth-story">
+      <div class="logo big"><span class="logo-icon">◈</span> fintrack<span class="dot">.</span></div>
+      <div class="eyebrow">YOUR MONEY, YOUR FUTURE</div>
+      <h1>Every rupee<br/>has a <em>purpose.</em></h1>
+      <p>Understand where your money goes with persona-customized tracking, shared family budgets, and smart spending alerts.</p>
+      <div class="hero-chips">
+        <span>✦ Persona-Based Tracking</span>
+        <span>◌ Category Insights</span>
+        <span>⌂ Family Circle</span>
+        <span>⚡ Spending Alerts</span>
+      </div>
+      <div class="decor-ring"></div>
+    </div>
+
+    <section class="auth-card">
+      <div class="mobile-logo logo"><span class="logo-icon">◈</span> fintrack.</div>
+      <div class="segmented">
+        <button id="loginTab" class="active" type="button">Log in</button>
+        <button id="registerTab" type="button">Create account</button>
+      </div>
+
+      <h2 id="authTitle">Welcome back</h2>
+      <p class="muted" id="authSub">Sign in with your Email or Login ID to access your dashboard.</p>
+
+      <form id="authForm">
+        <label id="nameGroup" class="hidden">Full Name
+          <input id="authName" autocomplete="name" placeholder="e.g. Rahul Sharma"/>
+        </label>
+
+        <label id="loginInputLabel">
+          <span id="loginInputTitle">Email address or Login ID</span>
+          <input id="authEmail" type="text" autocomplete="username" required placeholder="you@example.com or username"/>
+        </label>
+
+        <label id="personaGroup" class="hidden">Persona / User Type
+          <select id="authPersona">
+            <option value="student">Student</option>
+            <option value="professional">Working Professional</option>
+            <option value="senior">Senior Citizen</option>
+            <option value="family">Family</option>
+          </select>
+        </label>
+
+        <label>Password
+          <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="At least 6 characters"/>
+        </label>
+
+        <label id="confirmPasswordGroup" class="hidden">Confirm Password
+          <input id="authConfirmPassword" type="password" autocomplete="new-password" placeholder="Re-enter your password"/>
+        </label>
+
+        <button class="btn primary full" id="authSubmit">Log in →</button>
+      </form>
+      <div class="auth-foot">Your financial data stays securely stored in SQLite. No plain text passwords.</div>
+    </section>
+  </div>
+
+  <!-- APP SECTION -->
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="logo"><span class="logo-icon">◈</span> fintrack<span class="dot">.</span></div>
+      <div class="side-label">WORKSPACE</div>
+      <nav aria-label="Main navigation">
+        <button class="nav active" data-page="dashboard">▦ <span>Overview</span></button>
+        <button class="nav" data-page="transactions">⇄ <span>Transactions</span></button>
+        <button class="nav" data-page="family">⌂ <span>Family circle</span></button>
+        <button class="nav" data-page="savings">◎ <span>Savings goals</span></button>
+      </nav>
+      <div class="side-spacer"></div>
+      <div class="side-tip">
+        <span>✦ PERSONA TRACKING</span>
+        <strong id="sidePersonaBadge">Student</strong>
+        <p>Categories and budget alerts tailored specifically for your lifestyle.</p>
+      </div>
+      <div class="side-user">
+        <span id="avatar">P</span>
+        <div>
+          <strong id="userName">Your account</strong>
+          <small id="userEmail"></small>
+        </div>
+        <button id="logoutBtn" title="Log out" aria-label="Log out">↪</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="breadcrumb">MY WORKSPACE <span>/</span> <strong id="crumb">Overview</strong></div>
+        <div class="top-actions">
+          <span class="persona-tag" id="topPersonaTag">Persona: Student</span>
+          <span class="today" id="today"></span>
+          <button class="btn secondary small" id="openBudgetBtn">⚙ Set Budget</button>
+          <button class="btn primary small" id="quickAdd">＋ Add transaction</button>
+        </div>
+      </header>
+
+      <!-- OVERVIEW / DASHBOARD PAGE -->
+      <section class="content" id="page-dashboard">
+        <div class="heading">
+          <div>
+            <div class="eyebrow dark">YOUR FINANCIAL SNAPSHOT</div>
+            <h1>Good to see you, <span id="greetingName">friend</span> 👋</h1>
+            <p class="muted">A clear picture of your income, expenses, balance, and spending alerts.</p>
+          </div>
+          <span class="badge" id="personaBadge">● Student Persona</span>
+        </div>
+
+        <!-- 4 MAIN METRIC CARDS -->
+        <div class="metric-grid">
+          <div class="metric">
+            <span class="metric-label">TOTAL INCOME <i class="m-icon green">↗</i></span>
+            <strong id="metricIncome">₹0</strong>
+            <small>Total recorded income</small>
+          </div>
+          <div class="metric">
+            <span class="metric-label">TOTAL EXPENSES <i class="m-icon coral">↘</i></span>
+            <strong id="metricExpense">₹0</strong>
+            <small>Total recorded expenses</small>
+          </div>
+          <div class="metric feature-metric">
+            <span class="metric-label">CURRENT BALANCE <i class="m-icon purple">◈</i></span>
+            <strong id="metricBalance">₹0</strong>
+            <small>Income − Expenses</small>
+          </div>
+          <div class="metric">
+            <span class="metric-label">THIS MONTH'S SPENDING <i class="m-icon blue">📅</i></span>
+            <strong id="metricThisMonth">₹0</strong>
+            <small id="metricThisMonthSub">Expense for current month</small>
+          </div>
+        </div>
+
+        <!-- SPENDING ALERTS SECTION -->
+        <div class="panel space-bottom">
+          <div class="panel-head">
+            <div>
+              <h3>⚡ Spending Alerts</h3>
+              <p class="muted">Automated rule-based notifications for your monthly & category budgets</p>
+            </div>
+            <button class="btn secondary small" id="manageBudgetBtn">⚙ Manage Budgets</button>
+          </div>
+          <div id="alertsContainer" class="alerts-list">
+            <!-- Dynamic alerts rendered here -->
+          </div>
+        </div>
+
+        <!-- GRAPHS SECTION -->
+        <div class="split">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Where Your Money Goes</h3>
+                <p class="muted">Expense category breakdown for <span id="chartMonth">this month</span></p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="expenseCategoryChartCanvas" height="240"></canvas>
+            </div>
+            <div id="categoryChartList" class="category-list-fallback space-top"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Monthly Income vs Expenses</h3>
+                <p class="muted">Income vs Expense trends from SQLite data</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="incomeVsExpenseChartCanvas" height="240"></canvas>
+            </div>
+          </section>
+        </div>
+
+        <!-- RECENT TRANSACTIONS PANEL -->
+        <div class="panel space-top">
+          <div class="panel-head">
+            <div>
+              <h3>Recent Transactions</h3>
+              <p class="muted">Your latest money activities</p>
+            </div>
+            <button class="text-btn" data-jump="transactions">See all →</button>
+          </div>
+          <div id="recentTransactions" class="recent-list"></div>
+        </div>
+      </section>
+
+      <!-- TRANSACTIONS PAGE -->
+      <section class="content hidden" id="page-transactions">
+        <div class="heading">
+          <div>
+            <div class="eyebrow dark">TRACK EVERY RUPEE</div>
+            <h1>Transactions</h1>
+            <p class="muted">Log income and expenses categorized by your persona.</p>
+          </div>
+          <button class="btn primary" data-modal="transaction">＋ New transaction</button>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <div class="field-inline">
+              <label for="txScope">Showing</label>
+              <select id="txScope"><option value="personal">Personal transactions</option></select>
+            </div>
+            <div class="field-inline">
+              <label for="txFilter">Type</label>
+              <select id="txFilter">
+                <option value="all">All types</option>
+                <option value="income">Income</option>
+                <option value="expense">Expenses</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>TRANSACTION</th>
+                  <th>DATE</th>
+                  <th>TYPE</th>
+                  <th>AMOUNT</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="txBody"></tbody>
+            </table>
+          </div>
+          <p id="txEmpty" class="empty hidden">No transactions recorded yet. Click "New transaction" to add one.</p>
+        </div>
+      </section>
+
+      <!-- FAMILY CIRCLE PAGE -->
+      <section class="content hidden" id="page-family">
+        <div class="heading">
+          <div>
+            <div class="eyebrow dark">BETTER TOGETHER</div>
+            <h1>Family Circle</h1>
+            <p class="muted">Share a family budget, manage member login accounts, track shared expenses & graphs.</p>
+          </div>
+        </div>
+
+        <div class="split" id="familySetup">
+          <div class="panel">
+            <h3>Create your family circle</h3>
+            <p class="muted">Start a family workspace as the Family Owner.</p>
+            <form id="createFamilyForm" class="stack-form">
+              <label>Family Name
+                <input id="familyName" placeholder="e.g. Jadhav Family" required minlength="2"/>
+              </label>
+              <label>Monthly Family Budget (₹)
+                <input id="familyBudget" type="number" min="0" step="0.01" value="30000" required/>
+              </label>
+              <button class="btn primary">Create family circle →</button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h3>Join an existing family</h3>
+            <p class="muted">Enter the invite code provided by your Family Owner.</p>
+            <form id="joinFamilyForm" class="stack-form">
+              <label>Invitation Code
+                <input id="joinCode" placeholder="10-character code" required/>
+              </label>
+              <button class="btn secondary">Join family circle →</button>
+            </form>
+          </div>
+        </div>
+
+        <div id="familyDetails" class="hidden">
+          <div class="family-selector">
+            <label for="familySelect">Selected Family:</label>
+            <select id="familySelect"></select>
+            <button class="btn secondary small" id="toggleFamilySetup">＋ Create / Join Another</button>
+          </div>
+
+          <div class="metric-grid four">
+            <div class="metric">
+              <span class="metric-label">FAMILY BUDGET</span>
+              <strong id="famBudgetValue">₹0</strong>
+              <small id="famBudgetText">Monthly set limit</small>
+            </div>
+            <div class="metric">
+              <span class="metric-label">THIS MONTH'S FAMILY SPEND</span>
+              <strong id="famSpend">₹0</strong>
+              <small>Across all members</small>
+            </div>
+            <div class="metric">
+              <span class="metric-label">REMAINING BUDGET</span>
+              <strong id="famRemaining">₹0</strong>
+              <small>Available budget</small>
+            </div>
+            <div class="metric">
+              <span class="metric-label">MEMBERS</span>
+              <strong id="famMemberCountNum">0</strong>
+              <small>Family member accounts</small>
+            </div>
+          </div>
+
+          <!-- FAMILY SPENDING ALERTS -->
+          <div class="panel space-top space-bottom">
+            <div class="panel-head">
+              <div>
+                <h3>⚡ Family Spending Alerts</h3>
+                <p class="muted">Real-time alerts for overall family budget</p>
+              </div>
+            </div>
+            <div id="familyAlertsContainer" class="alerts-list"></div>
+          </div>
+
+          <div class="split">
+            <div class="panel">
+              <div class="panel-head">
+                <h3>Family Expense Breakdown</h3>
+                <span id="famBudgetPct" class="pill">0%</span>
+              </div>
+              <div class="chart-container">
+                <canvas id="familyCategoryChartCanvas" height="220"></canvas>
+              </div>
+              <div class="progress-track space-top">
+                <div id="familyProgress" class="progress-fill"></div>
+              </div>
+              <p class="muted space-top" id="famBudgetHelp"></p>
+              <form id="editFamilyBudget" class="inline-form hidden">
+                <input id="newFamilyBudget" type="number" min="0" step="0.01" placeholder="New budget ₹" aria-label="New family budget"/>
+                <button class="btn secondary small">Update Budget</button>
+              </form>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <h3>Family Members</h3>
+                <span class="pill" id="memberCount">0 members</span>
+              </div>
+              <div id="memberList" class="members"></div>
+              
+              <!-- OWNER ONLY BUTTON: ADD FAMILY MEMBER -->
+              <button class="btn primary full" id="openAddMemberBtn">＋ Add Family Member Account</button>
+              <button class="btn secondary full space-top" id="addFamilyTx">＋ Log Family Transaction</button>
+            </div>
+          </div>
+
+          <div class="panel space-top">
+            <div class="panel-head">
+              <h3>Recent Family Activity</h3>
+              <button class="text-btn" id="famAddAnother">＋ Add transaction</button>
+            </div>
+            <div id="familyActivity" class="recent-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SAVINGS GOALS PAGE -->
+      <section class="content hidden" id="page-savings">
+        <div class="heading">
+          <div>
+            <div class="eyebrow dark">GOAL SETTING</div>
+            <h1>Savings Goals</h1>
+            <p class="muted">Set savings targets for yourself or your family circle.</p>
+          </div>
+          <button class="btn primary" data-modal="goal">＋ Create goal</button>
+        </div>
+        <div class="field-inline gap">
+          <label for="goalScope">Goal space</label>
+          <select id="goalScope"><option value="personal">My goals</option></select>
+        </div>
+        <div id="goalGrid" class="goal-grid"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL CONTAINER -->
+  <div id="modalBackdrop" class="modal-backdrop hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button id="closeModal" class="modal-close" aria-label="Close">✕</button>
+      <h2 id="modalTitle"></h2>
+      <p class="muted" id="modalSubtitle"></p>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
