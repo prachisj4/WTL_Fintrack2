@@ -393,6 +393,21 @@ app.get('/api/dashboard',auth,safe((req,res)=>{
   });
 }));
 
+// --- ONLINE DATABASE INSPECTION API ---
+app.get('/api/db-view', auth, safe((req, res) => {
+  db.pragma('wal_checkpoint(FULL)');
+  const tables = ['users', 'families', 'family_members', 'budgets', 'transactions', 'goals'];
+  const dbData = {};
+  for (const t of tables) {
+    if (t === 'users') {
+      dbData[t] = db.prepare('SELECT id, name, email, login_id, persona, created_by_user_id, created_at FROM users').all();
+    } else {
+      dbData[t] = db.prepare(`SELECT * FROM ${t}`).all();
+    }
+  }
+  res.json({ ok: true, database: dbData });
+}));
+
 app.use((err,req,res,next)=>{
   if(res.headersSent) return next(err);
   if(!err.status) console.error(err);
@@ -400,3 +415,4 @@ app.use((err,req,res,next)=>{
 });
 
 app.listen(PORT,()=>console.log(`FinTrack running: http://localhost:${PORT}`));
+

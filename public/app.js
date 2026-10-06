@@ -47,6 +47,7 @@ async function api(url,opts={}){
 
 function toast(msg){
   const t=$('#toast');
+  if(!t) return;
   t.textContent=msg;
   t.classList.add('show');
   clearTimeout(window.toastTimer);
@@ -59,81 +60,93 @@ async function run(task){
 
 function setAuthMode(mode){
   state.authMode=mode;
-  $('#loginTab').classList.toggle('active',mode==='login');
-  $('#registerTab').classList.toggle('active',mode==='register');
+  if($('#loginTab')) $('#loginTab').classList.toggle('active',mode==='login');
+  if($('#registerTab')) $('#registerTab').classList.toggle('active',mode==='register');
   
-  $('#nameGroup').classList.toggle('hidden',mode==='login');
-  $('#personaGroup').classList.toggle('hidden',mode==='login');
-  $('#confirmPasswordGroup').classList.toggle('hidden',mode==='login');
+  if($('#nameGroup')) $('#nameGroup').classList.toggle('hidden',mode==='login');
+  if($('#personaGroup')) $('#personaGroup').classList.toggle('hidden',mode==='login');
+  if($('#confirmPasswordGroup')) $('#confirmPasswordGroup').classList.toggle('hidden',mode==='login');
   
-  $('#authName').required=mode==='register';
-  $('#authPersona').required=mode==='register';
-  $('#authConfirmPassword').required=mode==='register';
+  if($('#authName')) $('#authName').required=mode==='register';
+  if($('#authPersona')) $('#authPersona').required=mode==='register';
+  if($('#authConfirmPassword')) $('#authConfirmPassword').required=mode==='register';
 
-  $('#authTitle').textContent=mode==='login'?'Welcome back':'Create your account';
-  $('#authSub').textContent=mode==='login'?'Sign in with your Email address or Login ID to access your dashboard.':'Start managing your money with persona-customized tracking.';
-  $('#loginInputTitle').textContent=mode==='login'?'Email address or Login ID':'Email address';
-  $('#authEmail').placeholder=mode==='login'?'you@example.com or username':'you@example.com';
-  $('#authSubmit').textContent=mode==='login'?'Log in →':'Create account →';
-  $('#authPassword').autocomplete=mode==='login'?'current-password':'new-password';
+  if($('#authTitle')) $('#authTitle').textContent=mode==='login'?'Welcome Back':'Create Account';
+  if($('#authSub')) $('#authSub').textContent=mode==='login'?'Sign in with your Email address or Login ID to access your dashboard.':'Start managing your money with persona-customized tracking.';
+  if($('#loginInputTitle')) $('#loginInputTitle').textContent=mode==='login'?'Email address or Login ID':'Email address';
+  if($('#authEmail')) $('#authEmail').placeholder=mode==='login'?'you@example.com or username':'you@example.com';
+  if($('#authSubmit')) $('#authSubmit').textContent=mode==='login'?'Log in →':'Create account →';
+  if($('#authPassword')) $('#authPassword').autocomplete=mode==='login'?'current-password':'new-password';
 }
 
-$('#loginTab').onclick=()=>setAuthMode('login');
-$('#registerTab').onclick=()=>setAuthMode('register');
+if($('#loginTab')) $('#loginTab').onclick=()=>setAuthMode('login');
+if($('#registerTab')) $('#registerTab').onclick=()=>setAuthMode('register');
 
-$('#authForm').onsubmit=e=>{
-  e.preventDefault();
-  run(async()=>{
-    if(state.authMode==='register') {
-      const p1=$('#authPassword').value;
-      const p2=$('#authConfirmPassword').value;
-      if(p1!==p2) throw new Error('Passwords do not match.');
-      
-      const b={
-        name:$('#authName').value,
-        email:$('#authEmail').value,
-        password:p1,
-        persona:$('#authPersona').value
-      };
-      const r=await api('/register',{method:'POST',body:JSON.stringify(b)});
-      await boot(r.user);
-      toast('Account created! Welcome to FinTrack.');
-    } else {
-      const b={
-        email_or_login:$('#authEmail').value,
-        password:$('#authPassword').value
-      };
-      const r=await api('/login',{method:'POST',body:JSON.stringify(b)});
-      await boot(r.user);
-      toast('Welcome back to FinTrack!');
-    }
+if($('#authForm')) {
+  $('#authForm').onsubmit=e=>{
+    e.preventDefault();
+    run(async()=>{
+      if(state.authMode==='register') {
+        const p1=$('#authPassword').value;
+        const p2=$('#authConfirmPassword').value;
+        if(p1!==p2) throw new Error('Passwords do not match.');
+        
+        const b={
+          name:$('#authName').value,
+          email:$('#authEmail').value,
+          password:p1,
+          persona:$('#authPersona').value
+        };
+        const r=await api('/register',{method:'POST',body:JSON.stringify(b)});
+        await boot(r.user);
+        toast('Account created! Welcome to FinTrack.');
+      } else {
+        const b={
+          email_or_login:$('#authEmail').value,
+          password:$('#authPassword').value
+        };
+        const r=await api('/login',{method:'POST',body:JSON.stringify(b)});
+        await boot(r.user);
+        toast('Welcome back to FinTrack!');
+      }
+    });
+  };
+}
+
+if($('#logoutBtn')) {
+  $('#logoutBtn').onclick=()=>run(async()=>{
+    await api('/logout',{method:'POST'});
+    state.user=null;
+    $('#app').classList.add('hidden');
+    $('#auth').classList.remove('hidden');
+    if($('#authPassword')) $('#authPassword').value='';
+    if($('#authConfirmPassword')) $('#authConfirmPassword').value='';
   });
-};
+}
 
-$('#logoutBtn').onclick=()=>run(async()=>{
-  await api('/logout',{method:'POST'});
-  state.user=null;
-  $('#app').classList.add('hidden');
-  $('#auth').classList.remove('hidden');
-  $('#authPassword').value='';
-  if($('#authConfirmPassword')) $('#authConfirmPassword').value='';
-});
+// Mobile Hamburger Menu Toggle
+if($('#mobileMenuBtn')) {
+  $('#mobileMenuBtn').onclick=()=>{
+    const nav=$('#navMenu');
+    if(nav) nav.classList.toggle('open');
+  };
+}
 
 async function boot(user){
   state.user=user;
   $('#auth').classList.add('hidden');
   $('#app').classList.remove('hidden');
   
-  $('#userName').textContent=user.name;
-  $('#userEmail').textContent=user.email || user.login_id || 'Family member';
-  $('#avatar').textContent=user.name.charAt(0).toUpperCase();
-  $('#greetingName').textContent=user.name.split(' ')[0];
+  if($('#userName')) $('#userName').textContent=user.name;
+  if($('#userEmail')) $('#userEmail').textContent=user.email || user.login_id || 'Family member';
+  if($('#avatar')) $('#avatar').textContent=user.name.charAt(0).toUpperCase();
+  if($('#greetingName')) $('#greetingName').textContent=user.name.split(' ')[0];
   
   const personaText = PERSONA_NAMES[user.persona] || 'Student';
-  $('#personaBadge').textContent=`● ${personaText} Persona`;
-  $('#topPersonaTag').textContent=`Persona: ${personaText}`;
-  $('#sidePersonaBadge').textContent=personaText;
-  $('#today').textContent=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  if($('#personaBadge')) $('#personaBadge').textContent=`● ${personaText} Persona`;
+  if($('#topPersonaTag')) $('#topPersonaTag').textContent=`Persona: ${personaText}`;
+  if($('#sidePersonaBadge')) $('#sidePersonaBadge').textContent=personaText;
+  if($('#today')) $('#today').textContent=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
   
   await loadFamilies();
   await go('dashboard');
@@ -148,15 +161,17 @@ async function loadFamilies(){
   state.families=families;
   if(!families.some(f=>f.id===state.familyId)) state.familyId=families[0]?.id||null;
   
-  $('#familySelect').innerHTML=optionsOfFamilies();
-  if(state.familyId) $('#familySelect').value=state.familyId;
+  if($('#familySelect')) $('#familySelect').innerHTML=optionsOfFamilies();
+  if(state.familyId && $('#familySelect')) $('#familySelect').value=state.familyId;
   
   const choices='<option value="personal">Personal transactions</option>'+families.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('');
-  $('#txScope').innerHTML=choices;
-  $('#txScope').value=state.txScope==='personal'?'personal':String(state.txScope);
-  if($('#txScope').selectedIndex<0){ state.txScope='personal'; $('#txScope').value='personal'; }
+  if($('#txScope')) {
+    $('#txScope').innerHTML=choices;
+    $('#txScope').value=state.txScope==='personal'?'personal':String(state.txScope);
+    if($('#txScope').selectedIndex<0){ state.txScope='personal'; $('#txScope').value='personal'; }
+  }
   
-  $('#goalScope').innerHTML='<option value="personal">My goals</option>'+families.map(f=>`<option value="${f.id}">${esc(f.name)} shared goals</option>`).join('');
+  if($('#goalScope')) $('#goalScope').innerHTML='<option value="personal">My goals</option>'+families.map(f=>`<option value="${f.id}">${esc(f.name)} shared goals</option>`).join('');
 }
 
 async function go(page){
@@ -164,7 +179,8 @@ async function go(page){
   document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   document.querySelectorAll('.content').forEach(el=>el.classList.toggle('hidden',el.id!==`page-${page}`));
   
-  $('#crumb').textContent={dashboard:'Overview',transactions:'Transactions',savings:'Savings goals',family:'Family circle'}[page];
+  // Close mobile navigation drawer if open
+  if($('#navMenu')) $('#navMenu').classList.remove('open');
   
   if(page==='dashboard') await loadDashboard();
   if(page==='transactions') await loadTransactions();
@@ -181,7 +197,6 @@ const symbols={income:'↗',expense:'↘',savings:'◎'};
 function txRow(t,deleteButton=false){
   const sign=t.type==='income'?'+':'−';
   return `<div class="recent-row">
-    <span class="tx-icon ${t.type}">${symbols[t.type]}</span>
     <div class="recent-details">
       <strong>${esc(t.category)}${t.note?' · '+esc(t.note):''}</strong>
       <small>${esc(t.occurred_on)}${t.added_by?' · '+esc(t.added_by):''}</small>
@@ -201,12 +216,12 @@ async function loadDashboard(){
   const bal = inc - exp;
   const thisMonthExp = d.thisMonthExpense || 0;
   
-  $('#metricIncome').textContent=fmt(inc);
-  $('#metricExpense').textContent=fmt(exp);
-  $('#metricBalance').textContent=fmt(bal);
-  $('#metricThisMonth').textContent=fmt(thisMonthExp);
+  if($('#metricIncome')) $('#metricIncome').textContent=fmt(inc);
+  if($('#metricExpense')) $('#metricExpense').textContent=fmt(exp);
+  if($('#metricBalance')) $('#metricBalance').textContent=fmt(bal);
+  if($('#metricThisMonth')) $('#metricThisMonth').textContent=fmt(thisMonthExp);
   
-  $('#chartMonth').textContent=new Date().toLocaleString('en-IN',{month:'long',year:'numeric'});
+  if($('#chartMonth')) $('#chartMonth').textContent=new Date().toLocaleString('en-IN',{month:'long',year:'numeric'});
   
   // Render Spending Alerts
   renderSpendingAlerts(thisMonthExp, d.categories, d.budgets);
@@ -218,11 +233,15 @@ async function loadDashboard(){
   renderMonthlyIncomeExpenseChart(d.monthlyTrend);
   
   // Render Recent Transactions
-  $('#recentTransactions').innerHTML=t.transactions.length?t.transactions.slice(0,6).map(x=>txRow(x)).join(''):'<p class="empty">No transactions recorded yet. Add your first entry!</p>';
+  if($('#recentTransactions')) {
+    $('#recentTransactions').innerHTML=t.transactions.length?t.transactions.slice(0,6).map(x=>txRow(x)).join(''):'<p class="empty">No transactions recorded yet. Add your first entry!</p>';
+  }
 }
 
 function renderSpendingAlerts(thisMonthExpense, categories, budgets){
   const container = $('#alertsContainer');
+  if(!container) return;
+
   const alerts = [];
   
   // Overall Monthly Budget check
@@ -287,7 +306,7 @@ function renderSpendingAlerts(thisMonthExpense, categories, budgets){
 
   if (alerts.length === 0) {
     if (overallLimit === 0) {
-      container.innerHTML = `<div class="alert-card safe"><span class="alert-icon">ℹ️</span><span>No budgets configured. Click <strong>⚙ Manage Budgets</strong> to set a monthly limit and receive alerts.</span></div>`;
+      container.innerHTML = `<div class="alert-card safe"><span class="alert-icon">ℹ️</span><span>No budgets configured. Click <strong>⚙ Manage</strong> to set a monthly limit and receive alerts.</span></div>`;
     } else {
       container.innerHTML = `<div class="alert-card safe"><span class="alert-icon">✅</span><span>Spending is well within budget limits. Keep it up!</span></div>`;
     }
@@ -300,20 +319,21 @@ function renderSpendingAlerts(thisMonthExpense, categories, budgets){
 function renderCategoryChart(categories) {
   const canvas = $('#expenseCategoryChartCanvas');
   const fallback = $('#categoryChartList');
+  if(!canvas) return;
   
   if (!categories || categories.length === 0) {
     if (expenseChartInstance) { expenseChartInstance.destroy(); expenseChartInstance = null; }
     canvas.style.display = 'none';
-    fallback.innerHTML = `<p class="empty">No expenses recorded for this month yet. Add an expense to see your category graph!</p>`;
+    if(fallback) fallback.innerHTML = `<p class="empty">No expenses recorded for this month yet. Add an expense to see your category graph!</p>`;
     return;
   }
   
   canvas.style.display = 'block';
-  fallback.innerHTML = '';
+  if(fallback) fallback.innerHTML = '';
 
   const labels = categories.map(c => c.category);
   const data = categories.map(c => c.amount / 100); // in Rupees for display
-  const colors = ['#6366f1', '#14a57f', '#f59e0b', '#ed776a', '#8b5cf6', '#06b6d4', '#ec4899', '#10b981', '#64748b'];
+  const colors = ['#0f4c3a', '#16a34a', '#d97706', '#dc2626', '#2563eb', '#0891b2', '#9333ea', '#059669', '#475569'];
 
   if (expenseChartInstance) expenseChartInstance.destroy();
 
@@ -384,14 +404,14 @@ function renderMonthlyIncomeExpenseChart(monthlyTrend) {
         {
           label: 'Income (₹)',
           data: incomeData,
-          backgroundColor: '#14a57f',
-          borderRadius: 6
+          backgroundColor: '#16a34a',
+          borderRadius: 4
         },
         {
           label: 'Expenses (₹)',
           data: expenseData,
-          backgroundColor: '#ed776a',
-          borderRadius: 6
+          backgroundColor: '#dc2626',
+          borderRadius: 4
         }
       ]
     },
@@ -421,8 +441,8 @@ function renderMonthlyIncomeExpenseChart(monthlyTrend) {
 }
 
 // --- TRANSACTIONS PAGE & ACTIONS ---
-$('#txScope').onchange=e=>{ state.txScope=e.target.value; run(loadTransactions); };
-$('#txFilter').onchange=renderTransactions;
+if($('#txScope')) $('#txScope').onchange=e=>{ state.txScope=e.target.value; run(loadTransactions); };
+if($('#txFilter')) $('#txFilter').onchange=renderTransactions;
 
 async function loadTransactions(){
   const family=state.txScope!=='personal';
@@ -432,20 +452,24 @@ async function loadTransactions(){
 }
 
 function renderTransactions(){
+  if(!$('#txFilter') || !$('#txBody')) return;
   const f=$('#txFilter').value;
   const list=state.transactions.filter(x=>f==='all'||x.type===f);
-  $('#txEmpty').classList.toggle('hidden',list.length>0);
+  if($('#txEmpty')) $('#txEmpty').classList.toggle('hidden',list.length>0);
+  
   $('#txBody').innerHTML=list.map(t=>`<tr>
-    <td>${esc(t.category)}<small>${esc(t.note||t.added_by||'No description')}</small></td>
+    <td><strong>${esc(t.category)}</strong></td>
     <td>${esc(t.occurred_on)}</td>
+    <td><small>${esc(t.note||t.added_by||'—')}</small></td>
     <td><span class="type-tag ${t.type}">${esc(t.type)}</span></td>
-    <td><strong class="recent-amount ${t.type}">${t.type==='income'?'+':'−'}${fmt(t.amount)}</strong></td>
-    <td>${state.txScope==='personal'||!t.added_by||t.added_by===state.user.name?`<button class="delete-btn" data-delete-tx="${t.id}">Delete</button>`:''}</td>
+    <td class="text-right"><strong class="recent-amount ${t.type}">${t.type==='income'?'+':'−'}${fmt(t.amount)}</strong></td>
+    <td class="text-center">${state.txScope==='personal'||!t.added_by||t.added_by===state.user.name?`<button class="delete-btn" data-delete-tx="${t.id}">Delete</button>`:''}</td>
   </tr>`).join('');
 }
 
 // --- SAVINGS GOALS PAGE ---
 async function loadGoals(){
+  if(!$('#goalScope')) return;
   const value=$('#goalScope').value;
   const family=value!=='personal';
   state.goals=(await api('/goals'+(family?`?family_id=${value}`:''))).goals;
@@ -456,62 +480,76 @@ function goalCards(list){
   return list.length?list.map(g=>{
     const pct=Math.min(100,Math.floor(g.saved_amount/g.target_amount*100));
     return `<div class="goal-card">
-      <div class="goal-top"><span class="goal-symbol">◎</span><button class="delete-btn" data-delete-goal="${g.id}">Delete</button></div>
-      <h3>${esc(g.title)}</h3>
-      <p class="muted">Tracked saving allocation.</p>
-      <div class="goal-numbers"><strong>${fmt(g.saved_amount)}</strong><span>of ${fmt(g.target_amount)}</span></div>
+      <div class="goal-top" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="font-size:15px">${esc(g.title)}</strong>
+        <button class="delete-btn" data-delete-goal="${g.id}">Delete</button>
+      </div>
+      <p class="muted" style="font-size:12px">Tracked saving allocation.</p>
+      <div class="goal-numbers" style="display:flex;justify-content:space-between;margin:12px 0 6px">
+        <strong>${fmt(g.saved_amount)}</strong>
+        <span class="muted">Target: ${fmt(g.target_amount)}</span>
+      </div>
       <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
-      <div class="goal-foot"><span>${pct}% complete</span><button class="text-btn" data-contribute="${g.id}">＋ Contribute</button></div>
+      <div class="goal-foot" style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <span class="muted" style="font-size:11px">${pct}% achieved</span>
+        <button class="text-btn" data-contribute="${g.id}">＋ Contribute</button>
+      </div>
     </div>`;
   }).join(''):'<p class="empty">No goals yet. Create a target worth saving for.</p>';
 }
 
-function renderGoals(){ $('#goalGrid').innerHTML=goalCards(state.goals); }
-$('#goalScope').onchange=()=>run(loadGoals);
+function renderGoals(){ if($('#goalGrid')) $('#goalGrid').innerHTML=goalCards(state.goals); }
+if($('#goalScope')) $('#goalScope').onchange=()=>run(loadGoals);
 
 // --- FAMILY CIRCLE PAGE ---
-$('#createFamilyForm').onsubmit=e=>{
-  e.preventDefault();
-  run(async()=>{
-    const x=await api('/families',{method:'POST',body:JSON.stringify({name:$('#familyName').value,monthly_budget:$('#familyBudget').value})});
-    state.familyId=x.id;
-    await loadFamilies();
-    await loadFamily();
-    toast('Family circle created successfully!');
-  });
-};
+if($('#createFamilyForm')) {
+  $('#createFamilyForm').onsubmit=e=>{
+    e.preventDefault();
+    run(async()=>{
+      const x=await api('/families',{method:'POST',body:JSON.stringify({name:$('#familyName').value,monthly_budget:$('#familyBudget').value})});
+      state.familyId=x.id;
+      await loadFamilies();
+      await loadFamily();
+      toast('Family circle created successfully!');
+    });
+  };
+}
 
-$('#joinFamilyForm').onsubmit=e=>{
-  e.preventDefault();
-  run(async()=>{
-    const x=await api('/families/join',{method:'POST',body:JSON.stringify({code:$('#joinCode').value})});
-    state.familyId=x.id;
-    await loadFamilies();
-    await loadFamily();
-    toast('Joined '+x.name);
-  });
-};
+if($('#joinFamilyForm')) {
+  $('#joinFamilyForm').onsubmit=e=>{
+    e.preventDefault();
+    run(async()=>{
+      const x=await api('/families/join',{method:'POST',body:JSON.stringify({code:$('#joinCode').value})});
+      state.familyId=x.id;
+      await loadFamilies();
+      await loadFamily();
+      toast('Joined '+x.name);
+    });
+  };
+}
 
-$('#familySelect').onchange=e=>{ state.familyId=Number(e.target.value); run(loadFamily); };
-$('#toggleFamilySetup').onclick=()=>$('#familySetup').classList.toggle('hidden');
+if($('#familySelect')) $('#familySelect').onchange=e=>{ state.familyId=Number(e.target.value); run(loadFamily); };
+if($('#toggleFamilySetup')) $('#toggleFamilySetup').onclick=()=>$('#familySetup').classList.toggle('hidden');
 
-$('#editFamilyBudget').onsubmit=e=>{
-  e.preventDefault();
-  run(async()=>{
-    await api(`/families/${state.familyId}/budget`,{method:'PATCH',body:JSON.stringify({monthly_budget:$('#newFamilyBudget').value})});
-    await loadFamilies();
-    await loadFamily();
-    toast('Family budget updated.');
-  });
-};
+if($('#editFamilyBudget')) {
+  $('#editFamilyBudget').onsubmit=e=>{
+    e.preventDefault();
+    run(async()=>{
+      await api(`/families/${state.familyId}/budget`,{method:'PATCH',body:JSON.stringify({monthly_budget:$('#newFamilyBudget').value})});
+      await loadFamilies();
+      await loadFamily();
+      toast('Family budget updated.');
+    });
+  };
+}
 
 async function loadFamily(){
   const f=state.families.find(x=>x.id===state.familyId);
-  $('#familyDetails').classList.toggle('hidden',!f);
-  $('#familySetup').classList.toggle('hidden',!!f);
+  if($('#familyDetails')) $('#familyDetails').classList.toggle('hidden',!f);
+  if($('#familySetup')) $('#familySetup').classList.toggle('hidden',!!f);
   if(!f) return;
 
-  $('#familySelect').value=f.id;
+  if($('#familySelect')) $('#familySelect').value=f.id;
   
   const [dash,tx,member]=await Promise.all([
     api(`/dashboard?family_id=${f.id}`),
@@ -523,34 +561,38 @@ async function loadFamily(){
   const remaining = Math.max(0, f.monthly_budget - monthlySpent);
   const pct=f.monthly_budget?monthlySpent/f.monthly_budget*100:0;
 
-  $('#famBudgetValue').textContent=fmt(f.monthly_budget);
-  $('#famSpend').textContent=fmt(monthlySpent);
-  $('#famRemaining').textContent=fmt(remaining);
-  $('#famMemberCountNum').textContent=member.members.length;
+  if($('#famBudgetValue')) $('#famBudgetValue').textContent=fmt(f.monthly_budget);
+  if($('#famSpend')) $('#famSpend').textContent=fmt(monthlySpent);
+  if($('#famRemaining')) $('#famRemaining').textContent=fmt(remaining);
+  if($('#famMemberCountNum')) $('#famMemberCountNum').textContent=member.members.length;
 
-  $('#famBudgetPct').textContent=f.monthly_budget?Math.round(pct)+'%':'Not set';
-  $('#familyProgress').style.width=Math.min(100,pct)+'%';
-  $('#familyProgress').style.background=pct>100?'#ed776a':'#686be9';
-  $('#famBudgetHelp').textContent=f.monthly_budget?`${fmt(remaining)} remaining this month${pct>100?' (budget exceeded)':''}`:'Set a monthly budget to see your progress.';
+  if($('#famBudgetPct')) $('#famBudgetPct').textContent=f.monthly_budget?Math.round(pct)+'%':'Not set';
+  if($('#familyProgress')) {
+    $('#familyProgress').style.width=Math.min(100,pct)+'%';
+    $('#familyProgress').style.background=pct>100?'#dc2626':'#0f4c3a';
+  }
+  if($('#famBudgetHelp')) $('#famBudgetHelp').textContent=f.monthly_budget?`${fmt(remaining)} remaining this month${pct>100?' (budget exceeded)':''}`:'Set a monthly budget to see your progress.';
 
-  $('#editFamilyBudget').classList.toggle('hidden',f.role!=='owner');
-  $('#memberCount').textContent=member.members.length+' member'+(member.members.length!==1?'s':'');
+  if($('#editFamilyBudget')) $('#editFamilyBudget').classList.toggle('hidden',f.role!=='owner');
+  if($('#memberCount')) $('#memberCount').textContent=member.members.length+' member'+(member.members.length!==1?'s':'');
 
   // ONLY FAMILY OWNER CAN ADD MEMBERS
   const isOwner = f.role === 'owner';
-  $('#openAddMemberBtn').classList.toggle('hidden', !isOwner);
+  if($('#openAddMemberBtn')) $('#openAddMemberBtn').classList.toggle('hidden', !isOwner);
 
   // Render Family Members
-  $('#memberList').innerHTML=member.members.map(m=>`<div class="member">
-    <span class="member-avatar">${esc(m.name[0].toUpperCase())}</span>
-    <div style="flex:1">
-      <strong>${esc(m.name)}</strong>
-      ${m.login_id?`<small class="member-sub">Login ID: ${esc(m.login_id)}</small>`:''}
-      <small class="member-sub">Persona: ${PERSONA_NAMES[m.persona]||'Student'}</small>
-    </div>
-    <span class="member-role">${esc(m.role)}</span>
-    ${isOwner && m.id !== state.user.id ? `<button class="delete-btn" data-remove-member="${m.id}" title="Remove member">✕</button>` : ''}
-  </div>`).join('');
+  if($('#memberList')) {
+    $('#memberList').innerHTML=member.members.map(m=>`<div class="member-item">
+      <span class="member-avatar">${esc(m.name[0].toUpperCase())}</span>
+      <div style="flex:1">
+        <strong>${esc(m.name)}</strong>
+        ${m.login_id?`<small class="muted" style="display:block">Login ID: ${esc(m.login_id)}</small>`:''}
+        <small class="muted" style="display:block">Persona: ${PERSONA_NAMES[m.persona]||'Student'}</small>
+      </div>
+      <span class="member-role">${esc(m.role)}</span>
+      ${isOwner && m.id !== state.user.id ? `<button class="delete-btn" data-remove-member="${m.id}" title="Remove member">✕</button>` : ''}
+    </div>`).join('');
+  }
 
   // Family Category Doughnut Graph
   renderFamilyCategoryChart(dash.categories);
@@ -559,11 +601,15 @@ async function loadFamily(){
   renderFamilySpendingAlerts(monthlySpent, f.monthly_budget);
 
   // Family Recent Activity
-  $('#familyActivity').innerHTML=tx.transactions.length?tx.transactions.slice(0,8).map(t=>txRow(t)).join(''):'<p class="empty">Family activity appears here when members add transactions.</p>';
+  if($('#familyActivity')) {
+    $('#familyActivity').innerHTML=tx.transactions.length?tx.transactions.slice(0,8).map(t=>txRow(t)).join(''):'<p class="empty">Family activity appears here when members add transactions.</p>';
+  }
 }
 
 function renderFamilySpendingAlerts(monthlySpent, monthlyBudget) {
   const container = $('#familyAlertsContainer');
+  if(!container) return;
+
   if (!monthlyBudget || monthlyBudget === 0) {
     container.innerHTML = `<div class="alert-card safe"><span class="alert-icon">ℹ️</span><span>No family budget set yet.</span></div>`;
     return;
@@ -616,7 +662,7 @@ function renderFamilyCategoryChart(categories) {
 
   const labels = categories.map(c => c.category);
   const data = categories.map(c => c.amount / 100);
-  const colors = ['#6366f1', '#14a57f', '#f59e0b', '#ed776a', '#8b5cf6', '#06b6d4', '#ec4899', '#10b981', '#64748b'];
+  const colors = ['#0f4c3a', '#16a34a', '#d97706', '#dc2626', '#2563eb', '#0891b2', '#9333ea', '#059669', '#475569'];
 
   if (familyCategoryChartInstance) familyCategoryChartInstance.destroy();
 
@@ -649,62 +695,64 @@ function renderFamilyCategoryChart(categories) {
 }
 
 // Owner opens "Add Family Member Account" Modal
-$('#openAddMemberBtn').onclick=()=>{
-  showModal(
-    '+ Add Family Member Account',
-    'Create a login account for a family member. They will be able to log in using their Login ID.',
-    `<form id="addMemberForm">
-      <label>Member Name
-        <input name="name" required placeholder="e.g. Mom / Dad / Sister"/>
-      </label>
-      <label>Login ID (Username)
-        <input name="login_id" required pattern="[a-zA-Z0-9_]{3,30}" title="3-30 letters, numbers, or underscores" placeholder="e.g. mom_jadhav"/>
-      </label>
-      <label>Persona / Member Type
-        <select name="persona">
-          <option value="family">Family Member</option>
-          <option value="student">Student</option>
-          <option value="professional">Working Professional</option>
-          <option value="senior">Senior Citizen</option>
-        </select>
-      </label>
-      <label>Password
-        <input name="password" type="password" minlength="6" required placeholder="Set member password"/>
-      </label>
-      <label>Confirm Password
-        <input name="confirm_password" type="password" minlength="6" required placeholder="Re-enter member password"/>
-      </label>
-      <button class="btn primary full">Create Family Member Account</button>
-    </form>`
-  );
+if($('#openAddMemberBtn')) {
+  $('#openAddMemberBtn').onclick=()=>{
+    showModal(
+      'Add Family Member Account',
+      'Create a login account for a family member. They will be able to log in using their Login ID.',
+      `<form id="addMemberForm">
+        <label>Member Name
+          <input name="name" required placeholder="e.g. Mom / Dad / Sister"/>
+        </label>
+        <label>Login ID (Username)
+          <input name="login_id" required pattern="[a-zA-Z0-9_]{3,30}" title="3-30 letters, numbers, or underscores" placeholder="e.g. mom_jadhav"/>
+        </label>
+        <label>Persona / Member Type
+          <select name="persona">
+            <option value="family">Family Member</option>
+            <option value="student">Student</option>
+            <option value="professional">Working Professional</option>
+            <option value="senior">Senior Citizen</option>
+          </select>
+        </label>
+        <label>Password
+          <input name="password" type="password" minlength="6" required placeholder="Set member password"/>
+        </label>
+        <label>Confirm Password
+          <input name="confirm_password" type="password" minlength="6" required placeholder="Re-enter member password"/>
+        </label>
+        <button class="btn primary full">Create Family Member Account</button>
+      </form>`
+    );
 
-  $('#addMemberForm').onsubmit=e=>{
-    e.preventDefault();
-    run(async()=>{
-      const f=new FormData(e.target);
-      const b=Object.fromEntries(f.entries());
-      if(b.password !== b.confirm_password) throw new Error('Passwords do not match.');
+    $('#addMemberForm').onsubmit=e=>{
+      e.preventDefault();
+      run(async()=>{
+        const f=new FormData(e.target);
+        const b=Object.fromEntries(f.entries());
+        if(b.password !== b.confirm_password) throw new Error('Passwords do not match.');
 
-      const res = await api(`/families/${state.familyId}/members`, {
-        method: 'POST',
-        body: JSON.stringify({
-          name: b.name,
-          login_id: b.login_id,
-          password: b.password,
-          persona: b.persona
-        })
+        const res = await api(`/families/${state.familyId}/members`, {
+          method: 'POST',
+          body: JSON.stringify({
+            name: b.name,
+            login_id: b.login_id,
+            password: b.password,
+            persona: b.persona
+          })
+        });
+
+        closeModal();
+        await loadFamily();
+        alert(`Family member created successfully!\n\nName: ${res.member.name}\nLogin ID: ${res.member.login_id}\n\nShare these credentials with your family member to log in.`);
+        toast(`Created family account for ${res.member.name}`);
       });
-
-      closeModal();
-      await loadFamily();
-      alert(`Family member created successfully!\n\nName: ${res.member.name}\nLogin ID: ${res.member.login_id}\n\nShare these credentials with your family member to log in.`);
-      toast(`Created family account for ${res.member.name}`);
-    });
+    };
   };
-};
+}
 
-$('#addFamilyTx').onclick=()=>openTx(state.familyId);
-$('#famAddAnother').onclick=()=>openTx(state.familyId);
+if($('#addFamilyTx')) $('#addFamilyTx').onclick=()=>openTx(state.familyId);
+if($('#famAddAnother')) $('#famAddAnother').onclick=()=>openTx(state.familyId);
 
 // --- MODAL SYSTEM ---
 function showModal(title,subtitle,html){
@@ -719,8 +767,8 @@ function closeModal(){
   $('#modalContent').innerHTML='';
 }
 
-$('#closeModal').onclick=closeModal;
-$('#modalBackdrop').onclick=e=>{ if(e.target===$('#modalBackdrop')) closeModal(); };
+if($('#closeModal')) $('#closeModal').onclick=closeModal;
+if($('#modalBackdrop')) $('#modalBackdrop').onclick=e=>{ if(e.target===$('#modalBackdrop')) closeModal(); };
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
 function scopeOptions(selected){
@@ -777,6 +825,7 @@ function openTx(familyId=null,forcedGoal=null){
 }
 
 function updateTxCategories(){
+  if(!$('#txType') || !$('#txCategory')) return;
   const type = $('#txType').value;
   const persona = (state.user && state.user.persona) ? state.user.persona : 'student';
   let cats = [];
@@ -810,7 +859,7 @@ function openBudgetModal(){
 
   const persona = (state.user && state.user.persona) ? state.user.persona : 'student';
   const expCats = EXPENSE_CATEGORIES[persona] || EXPENSE_CATEGORIES.student;
-  $('#budgetCategory').innerHTML = `<option value="">Overall Monthly Budget</option>` + expCats.map(c => `<option value="${c}">${c} Budget</option>`).join('');
+  if($('#budgetCategory')) $('#budgetCategory').innerHTML = `<option value="">Overall Monthly Budget</option>` + expCats.map(c => `<option value="${c}">${c} Budget</option>`).join('');
 
   $('#budgetForm').onsubmit=e=>{
     e.preventDefault();
@@ -831,9 +880,9 @@ function openBudgetModal(){
   };
 }
 
-$('#openBudgetBtn').onclick = openBudgetModal;
-$('#manageBudgetBtn').onclick = openBudgetModal;
-$('#quickAdd').onclick = () => openTx();
+if($('#openBudgetBtn')) $('#openBudgetBtn').onclick = openBudgetModal;
+if($('#manageBudgetBtn')) $('#manageBudgetBtn').onclick = openBudgetModal;
+if($('#quickAdd')) $('#quickAdd').onclick = () => openTx();
 
 document.querySelectorAll('[data-modal]').forEach(x => {
   x.onclick = () => {
@@ -902,7 +951,7 @@ run(async()=>{
     const r=await api('/me');
     await boot(r.user);
   }catch(e){
-    $('#auth').classList.remove('hidden');
+    if($('#auth')) $('#auth').classList.remove('hidden');
     setAuthMode('login');
   }
 });
